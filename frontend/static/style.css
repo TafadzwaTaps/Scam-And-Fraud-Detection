@@ -1,0 +1,138 @@
+/* ── Custom properties ─────────────────────────────────────────────────── */
+:root {
+  --brand:        #1a56db;
+  --brand-dark:   #1e429f;
+  --danger:       #e02424;
+  --warning:      #d97706;
+  --success:      #057a55;
+  --bg:           #f8fafc;
+  --card-bg:      #ffffff;
+  --border:       #e5e7eb;
+  --text:         #111827;
+  --muted:        #6b7280;
+  --radius:       0.75rem;
+  --shadow:       0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────────── */
+.navbar-brand .brand-icon {
+  width: 32px; height: 32px;
+  background: var(--brand);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  margin-right: .5rem;
+}
+
+/* ── Hero section ───────────────────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, #1a56db 0%, #1e429f 100%);
+  color: #fff;
+  padding: 3.5rem 0 2.5rem;
+}
+.hero h1 { font-weight: 800; letter-spacing: -.02em; }
+.hero p  { opacity: .85; max-width: 540px; }
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* ── Check form card ────────────────────────────────────────────────────── */
+.check-card { max-width: 680px; margin: -2rem auto 0; }
+
+/* ── Result panel ───────────────────────────────────────────────────────── */
+#result-panel { display: none; }
+
+/* ── Risk meter ─────────────────────────────────────────────────────────── */
+.risk-meter-wrap { position: relative; }
+.risk-score-display {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.risk-label {
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.status-badge {
+  display: inline-block;
+  padding: .35em .9em;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.status-safe        { background: #d1fae5; color: #065f46; }
+.status-suspicious  { background: #fef3c7; color: #92400e; }
+.status-high-risk   { background: #fee2e2; color: #991b1b; }
+
+/* ── Progress bar colours ───────────────────────────────────────────────── */
+.risk-bar { height: 12px; border-radius: 999px; transition: width .6s ease; }
+.risk-bar-safe        { background: var(--success); }
+.risk-bar-suspicious  { background: var(--warning); }
+.risk-bar-high-risk   { background: var(--danger);  }
+
+/* ── Keyword chips ──────────────────────────────────────────────────────── */
+.kw-chip {
+  display: inline-block;
+  padding: .25em .7em;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+  margin: .15rem;
+}
+
+/* ── Sample reports ─────────────────────────────────────────────────────── */
+.report-card {
+  border-left: 4px solid var(--brand);
+  background: #f0f7ff;
+  border-radius: 0 .5rem .5rem 0;
+  padding: .75rem 1rem;
+}
+.report-tag {
+  display: inline-block;
+  padding: .15em .6em;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  margin: .1rem;
+}
+
+/* ── Report form ────────────────────────────────────────────────────────── */
+.report-form-wrap { max-width: 680px; margin: 0 auto; }
+
+/* ── Loader ─────────────────────────────────────────────────────────────── */
+.spinner-wrap { display: none; }
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+footer { border-top: 1px solid var(--border); }
+
+/* ── Animations ─────────────────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeSlideUp .4s ease forwards; }

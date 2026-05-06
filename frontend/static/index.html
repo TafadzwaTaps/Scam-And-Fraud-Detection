@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScamGuard – Scam &amp; Fraud Detection</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous" />
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+      <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
+      ScamGuard
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#mainNav" aria-controls="mainNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="#check-section">Check</a></li>
+        <li class="nav-item"><a class="nav-link" href="#report-section">Report</a></li>
+        <li class="nav-item"><a class="nav-link" href="#recent-section">Recent Flags</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container text-center">
+    <h1 class="display-5 mb-3">Scam &amp; Fraud Detection</h1>
+    <p class="lead mb-0">
+      Instantly check phone numbers, URLs, and messages for fraud signals.
+      Help protect others by reporting scams you've encountered.
+    </p>
+  </div>
+</section>
+
+<!-- ── Check section ───────────────────────────────────────────────────── -->
+<section id="check-section" class="pb-5">
+  <div class="container">
+    <div class="check-card card p-4">
+      <h5 class="fw-bold mb-3"><i class="bi bi-search me-2 text-primary"></i>Check for Fraud</h5>
+
+      <div id="check-alert" class="alert alert-danger d-none" role="alert"></div>
+
+      <form id="check-form" novalidate>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="check-type" class="form-label fw-semibold">Type</label>
+            <select id="check-type" class="form-select">
+              <option value="phone">📞 Phone</option>
+              <option value="url">🔗 URL</option>
+              <option value="message" selected>✉️ Message</option>
+            </select>
+          </div>
+          <div class="col-md-9">
+            <label for="check-value" class="form-label fw-semibold">Value</label>
+            <input id="check-value" type="text" class="form-control"
+                   placeholder="Enter phone number, URL, or message text…"
+                   maxlength="2048" required />
+          </div>
+        </div>
+
+        <div id="check-spinner" class="spinner-wrap align-items-center gap-2 mt-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          <span class="text-muted small">Analysing…</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3 px-4">
+          <i class="bi bi-shield-check me-1"></i> Check Now
+        </button>
+      </form>
+    </div><!-- /check-card -->
+
+    <!-- ── Result panel ─────────────────────────────────────────────────── -->
+    <div id="result-panel" class="check-card card mt-3 p-4">
+      <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Risk Assessment</h5>
+
+      <!-- Score + bar -->
+      <div class="row align-items-center mb-3">
+        <div class="col-auto text-center">
+          <div class="risk-score-display" id="res-score">0</div>
+          <div class="risk-label text-muted">/ 100</div>
+        </div>
+        <div class="col">
+          <div class="mb-2">
+            <span id="res-status-badge" class="status-badge status-safe">SAFE</span>
+          </div>
+          <div class="progress" style="height:12px;border-radius:999px;background:#e5e7eb">
+            <div id="res-bar" class="risk-bar risk-bar-safe" style="width:0%"
+                 role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary message -->
+      <div id="res-message" class="alert alert-success"></div>
+
+      <!-- Stats row -->
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <div class="card p-3 text-center">
+            <div class="fs-4 fw-bold text-primary" id="res-report-count">0</div>
+            <div class="small text-muted">Community Reports</div>
+          </div>
+        </div>
+        <div class="col-sm-6" id="res-keywords-wrap">
+          <div class="card p-3">
+            <div class="small fw-semibold mb-1">🚩 Flagged Keywords</div>
+            <div id="res-keywords"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sample reports -->
+      <div>
+        <h6 class="fw-bold mb-2"><i class="bi bi-chat-left-text me-1"></i>Sample Complaints</h6>
+        <div id="res-reports"></div>
+        <p id="res-no-reports" class="text-muted small d-none">No community reports for this entry yet.</p>
+      </div>
+    </div><!-- /result-panel -->
+  </div>
+</section>
+
+<!-- ── Report section ──────────────────────────────────────────────────── -->
+<section id="report-section" class="py-5 bg-light border-top border-bottom">
+  <div class="container">
+    <div class="report-form-wrap">
+      <h4 class="fw-bold mb-1"><i class="bi bi-flag-fill me-2 text-danger"></i>Report a Scam</h4>
+      <p class="text-muted mb-4">Help the community by reporting scam phone numbers, fraudulent URLs, or suspicious messages.</p>
+
+      <div id="report-alert"   class="alert alert-danger  d-none" role="alert"></div>
+      <div id="report-success" class="alert alert-success d-none" role="alert">
+        <i class="bi bi-check-circle-fill me-1"></i>
+        Thank you! Your report has been submitted and will help protect others.
+      </div>
+
+      <div class="card p-4">
+        <form id="report-form" novalidate>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="rep-type" class="form-label fw-semibold">Type</label>
+              <select id="rep-type" class="form-select">
+                <option value="phone">📞 Phone Number</option>
+                <option value="url">🔗 URL / Website</option>
+                <option value="message">✉️ Message Text</option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label for="rep-value" class="form-label fw-semibold">Value <span class="text-danger">*</span></label>
+              <input id="rep-value" type="text" class="form-control"
+                     placeholder="e.g. +1-800-123-4567 or https://phishing.example.com"
+                     maxlength="2048" required />
+            </div>
+            <div class="col-12">
+              <label for="rep-description" class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+              <textarea id="rep-description" class="form-control" rows="3"
+                        placeholder="Describe what happened – the more detail the better."
+                        maxlength="4000" required></textarea>
+            </div>
+            <div class="col-12">
+              <label for="rep-tags" class="form-label fw-semibold">Tags <span class="text-muted fw-normal">(comma-separated)</span></label>
+              <input id="rep-tags" type="text" class="form-control"
+                     placeholder="e.g. irs, lottery, phishing" maxlength="256" />
+              <div class="form-text">Optional labels to categorise the scam type.</div>
+            </div>
+          </div>
+
+          <div id="report-spinner" class="spinner-wrap align-items-center gap-2 mt-3">
+            <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+            <span class="text-muted small">Submitting…</span>
+          </div>
+
+          <button type="submit" class="btn btn-danger mt-3 px-4">
+            <i class="bi bi-flag me-1"></i> Submit Report
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Recent flagged entities ─────────────────────────────────────────── -->
+<section id="recent-section" class="py-5">
+  <div class="container">
+    <h4 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Recently Flagged</h4>
+    <p class="text-muted mb-4">Top high-risk entries based on community reports and keyword analysis.</p>
+
+    <div id="recent-error" class="alert alert-warning d-none">Could not load recent entities.</div>
+
+    <div class="card p-0 overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th style="width:80px">Type</th>
+              <th>Value</th>
+              <th style="width:200px">Risk Score</th>
+              <th style="width:80px">Reports</th>
+              <th style="width:110px">Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-tbody">
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Loading…
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────────────────── -->
+<footer class="py-4 bg-dark text-white-50 text-center">
+  <div class="container">
+    <p class="mb-0 small">
+      <i class="bi bi-shield-fill-check me-1"></i>
+      ScamGuard &mdash; Community-powered fraud detection.
+      Always verify independently before acting on any information.
+    </p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmJ/qFNNABb/MimNhFoR5ORG4GB+"
+        crossorigin="anonymous"></script>
+
+<!-- App JS -->
+<script src="/static/js/app.js"></script>
+</body>
+</html>
