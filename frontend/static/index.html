@@ -1,234 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ScamGuard – Scam &amp; Fraud Detection</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScamGuard — AI Fraud Detection Platform</title>
+  <meta name="description" content="Next-generation AI-powered scam and fraud detection. Check phone numbers, URLs, and messages instantly."/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>"/>
 
-  <!-- Bootstrap 5 -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous" />
-
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
-
-  <!-- Custom styles -->
-  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Bootstrap CSS — no integrity to avoid SRI hash mismatch -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
 <body>
 
-<!-- ── Navbar ──────────────────────────────────────────────────────────── -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-      <span class="brand-icon"><i class="bi bi-shield-fill-check"></i></span>
-      ScamGuard
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  CANVAS BACKGROUND
+════════════════════════════════════════════════════════════════════════════ -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  LIVE THREAT TICKER
+════════════════════════════════════════════════════════════════════════════ -->
+<div class="threat-ticker" role="marquee" aria-label="Live threat intelligence">
+  <div class="ticker-label"><i class="bi bi-activity"></i> LIVE THREATS</div>
+  <div class="ticker-track" id="ticker-track">
+    <span class="ticker-item danger">⚠ +263712345678 — IRS impersonation scam reported</span>
+    <span class="ticker-item warn">⚡ https://ecocash-verify.xyz — Phishing URL detected</span>
+    <span class="ticker-item danger">⚠ "Send $50 airtime urgent" — WhatsApp scam pattern</span>
+    <span class="ticker-item warn">⚡ +1-800-555-0199 — Fake job offer calls</span>
+    <span class="ticker-item danger">⚠ crypto-wallet-claim.net — Crypto fraud site</span>
+    <span class="ticker-item warn">⚡ "Landlord deposit" scam — 12 reports this week</span>
+    <span class="ticker-item danger">⚠ +263771234567 — EcoCash fraud reported ×8</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  NAVBAR
+════════════════════════════════════════════════════════════════════════════ -->
+<nav class="sg-nav" role="navigation" aria-label="Main navigation">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="#" aria-label="ScamGuard home">
+      <div class="brand-shield" aria-hidden="true">
+        <i class="bi bi-shield-fill-check"></i>
+        <div class="shield-ring"></div>
+      </div>
+      <span class="brand-name">ScamGuard</span>
+      <span class="brand-tag">AI</span>
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#mainNav" aria-controls="mainNav"
-            aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="#check-section">Check</a></li>
-        <li class="nav-item"><a class="nav-link" href="#report-section">Report</a></li>
-        <li class="nav-item"><a class="nav-link" href="#recent-section">Recent Flags</a></li>
-      </ul>
+
+    <div class="nav-links" role="list">
+      <a class="nav-link-item" href="#check-section" role="listitem">Scan</a>
+      <a class="nav-link-item" href="#threats-section" role="listitem">Threats</a>
+      <a class="nav-link-item" href="#report-section" role="listitem">Report</a>
+      <a class="nav-link-item" href="#recent-section" role="listitem">Intel</a>
+    </div>
+
+    <div class="nav-actions">
+      <div class="nav-status">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span class="status-text">System Online</span>
+      </div>
+      <button class="nav-login-btn" id="nav-auth-btn" aria-label="Open login dialog">
+        <i class="bi bi-person-lock" aria-hidden="true"></i>
+        <span>Login</span>
+      </button>
+      <div class="nav-user-pill d-none" id="nav-user-info" role="status" aria-live="polite">
+        <div class="user-avatar" id="nav-avatar-letter" aria-hidden="true">U</div>
+        <span class="user-email" id="nav-user-email"></span>
+      </div>
+      <button class="nav-logout-btn d-none" id="nav-logout-btn" aria-label="Logout">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+      </button>
     </div>
   </div>
 </nav>
 
-<!-- ── Hero ────────────────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="container text-center">
-    <h1 class="display-5 mb-3">Scam &amp; Fraud Detection</h1>
-    <p class="lead mb-0">
-      Instantly check phone numbers, URLs, and messages for fraud signals.
-      Help protect others by reporting scams you've encountered.
-    </p>
-  </div>
-</section>
-
-<!-- ── Check section ───────────────────────────────────────────────────── -->
-<section id="check-section" class="pb-5">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  HERO + SCAN PANEL
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="hero-section" id="check-section">
   <div class="container">
-    <div class="check-card card p-4">
-      <h5 class="fw-bold mb-3"><i class="bi bi-search me-2 text-primary"></i>Check for Fraud</h5>
+    <div class="hero-layout">
 
-      <div id="check-alert" class="alert alert-danger d-none" role="alert"></div>
+      <!-- Left: headline -->
+      <div class="hero-copy">
+        <div class="hero-eyebrow">
+          <span class="eyebrow-dot"></span>
+          AI-Powered Threat Intelligence
+        </div>
+        <h1 class="hero-title">
+          Detect Scams<br/>
+          <span class="gradient-text">Before They Strike</span>
+        </h1>
+        <p class="hero-desc">
+          Military-grade NLP analysis cross-referenced with community intelligence.
+          Check any phone number, URL, or message in seconds.
+        </p>
 
-      <form id="check-form" novalidate>
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label for="check-type" class="form-label fw-semibold">Type</label>
-            <select id="check-type" class="form-select">
-              <option value="phone">📞 Phone</option>
-              <option value="url">🔗 URL</option>
-              <option value="message" selected>✉️ Message</option>
-            </select>
+        <!-- Metrics row -->
+        <div class="hero-metrics">
+          <div class="metric-item">
+            <div class="metric-value" id="metric-scans">12,847</div>
+            <div class="metric-label">Scans Today</div>
           </div>
-          <div class="col-md-9">
-            <label for="check-value" class="form-label fw-semibold">Value</label>
-            <input id="check-value" type="text" class="form-control"
-                   placeholder="Enter phone number, URL, or message text…"
-                   maxlength="2048" required />
+          <div class="metric-sep"></div>
+          <div class="metric-item">
+            <div class="metric-value" id="metric-threats">3,291</div>
+            <div class="metric-label">Threats Blocked</div>
+          </div>
+          <div class="metric-sep"></div>
+          <div class="metric-item">
+            <div class="metric-value">98.4%</div>
+            <div class="metric-label">Accuracy Rate</div>
           </div>
         </div>
 
-        <div id="check-spinner" class="spinner-wrap align-items-center gap-2 mt-3">
-          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-          <span class="text-muted small">Analysing…</span>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3 px-4">
-          <i class="bi bi-shield-check me-1"></i> Check Now
-        </button>
-      </form>
-    </div><!-- /check-card -->
-
-    <!-- ── Result panel ─────────────────────────────────────────────────── -->
-    <div id="result-panel" class="check-card card mt-3 p-4">
-      <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Risk Assessment</h5>
-
-      <!-- Score + bar -->
-      <div class="row align-items-center mb-3">
-        <div class="col-auto text-center">
-          <div class="risk-score-display" id="res-score">0</div>
-          <div class="risk-label text-muted">/ 100</div>
-        </div>
-        <div class="col">
-          <div class="mb-2">
-            <span id="res-status-badge" class="status-badge status-safe">SAFE</span>
-          </div>
-          <div class="progress" style="height:12px;border-radius:999px;background:#e5e7eb">
-            <div id="res-bar" class="risk-bar risk-bar-safe" style="width:0%"
-                 role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
+        <!-- Scam category pills -->
+        <div class="scam-cats" aria-label="Common scam categories">
+          <div class="cat-label">Active threats:</div>
+          <span class="cat-pill phishing"><i class="bi bi-fish"></i> Phishing</span>
+          <span class="cat-pill landlord"><i class="bi bi-house-x"></i> Fake Landlords</span>
+          <span class="cat-pill ecocash"><i class="bi bi-phone"></i> EcoCash</span>
+          <span class="cat-pill jobs"><i class="bi bi-briefcase-x"></i> Fake Jobs</span>
+          <span class="cat-pill whatsapp"><i class="bi bi-chat-dots"></i> WhatsApp</span>
+          <span class="cat-pill crypto"><i class="bi bi-currency-bitcoin"></i> Crypto</span>
         </div>
       </div>
 
-      <!-- Summary message -->
-      <div id="res-message" class="alert alert-success"></div>
-
-      <!-- Stats row -->
-      <div class="row g-3 mb-3">
-        <div class="col-sm-6">
-          <div class="card p-3 text-center">
-            <div class="fs-4 fw-bold text-primary" id="res-report-count">0</div>
-            <div class="small text-muted">Community Reports</div>
+      <!-- Right: scan panel -->
+      <div class="scan-panel-wrap">
+        <div class="scan-panel" role="main" aria-label="Fraud scanner">
+          <!-- Panel header -->
+          <div class="panel-header">
+            <div class="panel-dots" aria-hidden="true">
+              <span class="dot red"></span>
+              <span class="dot amber"></span>
+              <span class="dot green"></span>
+            </div>
+            <span class="panel-title">THREAT SCANNER v2.0</span>
+            <div class="panel-indicator">
+              <span class="pulse-dot sm"></span>
+              <span>ACTIVE</span>
+            </div>
           </div>
+
+          <!-- Scan form -->
+          <div class="panel-body">
+            <div id="check-alert" class="sg-alert sg-alert-err" role="alert" aria-live="polite"></div>
+
+            <form id="check-form" novalidate aria-label="Fraud check form">
+              <div class="scan-type-grid">
+                <label class="type-radio" aria-label="Check phone number">
+                  <input type="radio" name="check-type" value="phone" id="type-phone"/>
+                  <span class="type-radio-face"><i class="bi bi-telephone-fill"></i><br/>Phone</span>
+                </label>
+                <label class="type-radio" aria-label="Check URL">
+                  <input type="radio" name="check-type" value="url" id="type-url"/>
+                  <span class="type-radio-face"><i class="bi bi-link-45deg"></i><br/>URL</span>
+                </label>
+                <label class="type-radio checked" aria-label="Check message text">
+                  <input type="radio" name="check-type" value="message" id="type-message" checked/>
+                  <span class="type-radio-face"><i class="bi bi-chat-text-fill"></i><br/>Message</span>
+                </label>
+              </div>
+
+              <div class="scan-input-wrap">
+                <div class="scan-input-icon" aria-hidden="true"><i class="bi bi-shield-shaded"></i></div>
+                <input id="check-value" type="text" class="scan-input"
+                       placeholder="Paste phone number, URL, or suspicious message…"
+                       maxlength="2048" required
+                       aria-label="Value to scan" autocomplete="off"/>
+              </div>
+
+              <button type="submit" class="scan-btn" id="scan-submit-btn" aria-label="Run fraud scan">
+                <span class="scan-btn-icon"><i class="bi bi-cpu"></i></span>
+                <span class="scan-btn-text">Run AI Scan</span>
+                <span class="scan-btn-arrow">→</span>
+              </button>
+
+              <!-- Progress bar (shown while scanning) -->
+              <div class="scan-progress-wrap" id="scan-progress-wrap" aria-hidden="true">
+                <div class="scan-progress-label">
+                  <span id="scan-progress-text">Initializing…</span>
+                  <span id="scan-progress-pct">0%</span>
+                </div>
+                <div class="scan-progress-track">
+                  <div class="scan-progress-bar" id="scan-progress-bar"></div>
+                  <div class="scan-progress-glow"></div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Scan beam overlay -->
+          <div class="scan-beam" id="scan-beam" aria-hidden="true"></div>
         </div>
-        <div class="col-sm-6" id="res-keywords-wrap">
-          <div class="card p-3">
-            <div class="small fw-semibold mb-1">🚩 Flagged Keywords</div>
-            <div id="res-keywords"></div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Sample reports -->
-      <div>
-        <h6 class="fw-bold mb-2"><i class="bi bi-chat-left-text me-1"></i>Sample Complaints</h6>
-        <div id="res-reports"></div>
-        <p id="res-no-reports" class="text-muted small d-none">No community reports for this entry yet.</p>
-      </div>
-    </div><!-- /result-panel -->
-  </div>
-</section>
+        <!-- ── RESULT PANEL ────────────────────────────────────────────────── -->
+        <div id="result-panel" class="result-panel" aria-live="polite" aria-label="Scan results">
 
-<!-- ── Report section ──────────────────────────────────────────────────── -->
-<section id="report-section" class="py-5 bg-light border-top border-bottom">
-  <div class="container">
-    <div class="report-form-wrap">
-      <h4 class="fw-bold mb-1"><i class="bi bi-flag-fill me-2 text-danger"></i>Report a Scam</h4>
-      <p class="text-muted mb-4">Help the community by reporting scam phone numbers, fraudulent URLs, or suspicious messages.</p>
-
-      <div id="report-alert"   class="alert alert-danger  d-none" role="alert"></div>
-      <div id="report-success" class="alert alert-success d-none" role="alert">
-        <i class="bi bi-check-circle-fill me-1"></i>
-        Thank you! Your report has been submitted and will help protect others.
-      </div>
-
-      <div class="card p-4">
-        <form id="report-form" novalidate>
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label for="rep-type" class="form-label fw-semibold">Type</label>
-              <select id="rep-type" class="form-select">
-                <option value="phone">📞 Phone Number</option>
-                <option value="url">🔗 URL / Website</option>
-                <option value="message">✉️ Message Text</option>
-              </select>
+          <!-- Score ring + status -->
+          <div class="result-header">
+            <div class="score-ring-wrap">
+              <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring-track" cx="60" cy="60" r="52"/>
+                <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52"
+                        stroke-dasharray="327" stroke-dashoffset="327"/>
+              </svg>
+              <div class="score-center">
+                <div class="score-number" id="res-score">0</div>
+                <div class="score-sub">/ 100</div>
+              </div>
             </div>
-            <div class="col-md-8">
-              <label for="rep-value" class="form-label fw-semibold">Value <span class="text-danger">*</span></label>
-              <input id="rep-value" type="text" class="form-control"
-                     placeholder="e.g. +1-800-123-4567 or https://phishing.example.com"
-                     maxlength="2048" required />
-            </div>
-            <div class="col-12">
-              <label for="rep-description" class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
-              <textarea id="rep-description" class="form-control" rows="3"
-                        placeholder="Describe what happened – the more detail the better."
-                        maxlength="4000" required></textarea>
-            </div>
-            <div class="col-12">
-              <label for="rep-tags" class="form-label fw-semibold">Tags <span class="text-muted fw-normal">(comma-separated)</span></label>
-              <input id="rep-tags" type="text" class="form-control"
-                     placeholder="e.g. irs, lottery, phishing" maxlength="256" />
-              <div class="form-text">Optional labels to categorise the scam type.</div>
+            <div class="result-meta">
+              <div id="res-status-badge" class="threat-badge badge-safe">
+                <i class="bi bi-shield-check"></i> SAFE
+              </div>
+              <div class="result-entity" id="res-entity-display"></div>
+              <div class="result-report-line">
+                <i class="bi bi-people-fill"></i>
+                <span id="res-report-count">0</span> community reports
+              </div>
+              <div id="res-message" class="result-verdict"></div>
             </div>
           </div>
 
-          <div id="report-spinner" class="spinner-wrap align-items-center gap-2 mt-3">
-            <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
-            <span class="text-muted small">Submitting…</span>
+          <!-- AI confidence meter -->
+          <div class="ai-meter-card">
+            <div class="ai-meter-header">
+              <span><i class="bi bi-cpu-fill"></i> AI Confidence</span>
+              <span class="ai-conf-val" id="res-confidence">0%</span>
+            </div>
+            <div class="ai-meter-track">
+              <div class="ai-meter-fill" id="res-confidence-bar"></div>
+              <div class="ai-meter-segments" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
           </div>
 
-          <button type="submit" class="btn btn-danger mt-3 px-4">
-            <i class="bi bi-flag me-1"></i> Submit Report
-          </button>
-        </form>
+          <!-- Detection signals -->
+          <div class="signals-grid">
+            <div class="signal-card">
+              <div class="signal-label"><i class="bi bi-key-fill"></i> Keyword Hits</div>
+              <div class="signal-chips" id="res-keywords"></div>
+            </div>
+            <div class="signal-card">
+              <div class="signal-label"><i class="bi bi-diagram-3-fill"></i> Pattern Matches</div>
+              <div class="signal-chips" id="res-regex"></div>
+            </div>
+          </div>
+
+          <!-- Community reports -->
+          <div class="community-reports-wrap">
+            <div class="cr-header">
+              <i class="bi bi-shield-exclamation"></i>
+              Community Intelligence
+              <span class="cr-disclaimer">Reports are community submissions — not legal findings</span>
+            </div>
+            <div id="res-reports"></div>
+            <p id="res-no-reports" class="cr-empty d-none">No community reports yet. Be the first to report if this is a scam.</p>
+          </div>
+
+          <!-- CTA row -->
+          <div class="result-cta-row">
+            <span class="cta-label">Experienced this scam?</span>
+            <button class="btn-ghost-sm" id="result-report-cta">
+              <i class="bi bi-flag-fill"></i> Report It
+            </button>
+            <button class="btn-ghost-sm" id="result-copy-btn">
+              <i class="bi bi-clipboard"></i> Copy Result
+            </button>
+          </div>
+
+        </div><!-- /result-panel -->
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Recent flagged entities ─────────────────────────────────────────── -->
-<section id="recent-section" class="py-5">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  THREAT CATEGORIES + TRUST SECTION
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section-dark" id="threats-section">
   <div class="container">
-    <h4 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>Recently Flagged</h4>
-    <p class="text-muted mb-4">Top high-risk entries based on community reports and keyword analysis.</p>
+    <div class="section-head">
+      <div class="section-eyebrow">Threat Intelligence</div>
+      <h2 class="section-h2">Active Scam <span class="gradient-text">Categories</span></h2>
+      <p class="section-p">Our AI monitors these active fraud patterns in real-time across Zimbabwe and globally.</p>
+    </div>
+    <div class="threat-grid">
+      <div class="threat-card" data-severity="critical">
+        <div class="threat-icon-wrap phishing-icon"><i class="bi bi-fish"></i></div>
+        <div class="threat-info">
+          <div class="threat-name">Phishing Attacks</div>
+          <div class="threat-desc">Fake websites stealing credentials and banking details</div>
+        </div>
+        <div class="threat-level">
+          <span class="level-dot critical"></span> Critical
+        </div>
+      </div>
+      <div class="threat-card" data-severity="high">
+        <div class="threat-icon-wrap ecocash-icon"><i class="bi bi-phone-vibrate"></i></div>
+        <div class="threat-info">
+          <div class="threat-name">EcoCash Fraud</div>
+          <div class="threat-desc">Fake EcoCash agents and unauthorized transaction requests</div>
+        </div>
+        <div class="threat-level">
+          <span class="level-dot high"></span> High
+        </div>
+      </div>
+      <div class="threat-card" data-severity="high">
+        <div class="threat-icon-wrap landlord-icon"><i class="bi bi-house-x-fill"></i></div>
+        <div class="threat-info">
+          <div class="threat-name">Fake Landlords</div>
+          <div class="threat-desc">Rental deposit scams with non-existent properties</div>
+        </div>
+        <div class="threat-level">
+          <span class="level-dot high"></span> High
+        </div>
+      </div>
+      <div class="threat-card" data-severity="high">
+        <div class="threat-icon-wrap jobs-icon"><i class="bi bi-briefcase-fill"></i></div>
+        <div class="threat-info">
+          <div class="threat-name">Fake Job Offers</div>
+          <div class="threat-desc">Advance fee fraud disguised as employment opportunities</div>
+        </div>
+        <div class="threat-level">
+          <span class="level-dot high"></span> High
+        </div>
+      </div>
+      <div class="threat-card" data-severity="medium">
+        <div class="threat-icon-wrap whatsapp-icon"><i class="bi bi-chat-dots-fill"></i></div>
+        <div class="threat-info">
+          <div class="threat-name">WhatsApp Scams</div>
+          <div class="threat-desc">Urgent money requests and fake prize notifications</div>
+        </div>
+        <div class="threat-level">
+          <span class="level-dot medium"></span> Medium
+        </div>
+      </div>
+      <div class="threat-card" data-severity="critical">
+        <div class="threat-icon-wrap crypto-icon"><i class="bi bi-currency-bitcoin"></i></div>
+        <div class="threat-info">
+          <div class="threat-name">Crypto Fraud</div>
+          <div class="threat-desc">Investment scams and fake cryptocurrency platforms</div>
+        </div>
+        <div class="threat-level">
+          <span class="level-dot critical"></span> Critical
+        </div>
+      </div>
+    </div>
 
-    <div id="recent-error" class="alert alert-warning d-none">Could not load recent entities.</div>
+    <!-- Trust metrics -->
+    <div class="trust-metrics-row">
+      <div class="trust-metric">
+        <div class="tm-icon"><i class="bi bi-shield-lock-fill"></i></div>
+        <div class="tm-val">256-bit</div>
+        <div class="tm-label">Encryption</div>
+      </div>
+      <div class="trust-metric">
+        <div class="tm-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="tm-val">50K+</div>
+        <div class="tm-label">Users Protected</div>
+      </div>
+      <div class="trust-metric">
+        <div class="tm-icon"><i class="bi bi-cpu-fill"></i></div>
+        <div class="tm-val">35+</div>
+        <div class="tm-label">NLP Patterns</div>
+      </div>
+      <div class="trust-metric">
+        <div class="tm-icon"><i class="bi bi-clock-history"></i></div>
+        <div class="tm-val">24/7</div>
+        <div class="tm-label">Monitoring</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <div class="card p-0 overflow-hidden">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-dark">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  REPORT SECTION
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section-mid" id="report-section">
+  <div class="container" style="max-width:740px">
+    <div class="section-head">
+      <div class="section-eyebrow">Community Intelligence</div>
+      <h2 class="section-h2"><i class="bi bi-flag-fill" style="color:var(--red)"></i> Report a Scam</h2>
+      <p class="section-p">Every report trains our AI and protects thousands. Login required to maintain data quality.</p>
+    </div>
+
+    <!-- Auth lock -->
+    <div class="auth-lock-bar" id="auth-lock-notice" role="alert">
+      <div class="lock-icon"><i class="bi bi-lock-fill"></i></div>
+      <div class="lock-text">
+        <strong>Authentication required</strong> to submit intelligence reports.
+      </div>
+      <button class="lock-btn" id="lock-login-btn">
+        <i class="bi bi-person-lock"></i> Login / Register
+      </button>
+    </div>
+
+    <div id="report-alert"   class="sg-alert sg-alert-err"  role="alert" aria-live="polite"></div>
+    <div id="report-success" class="sg-alert sg-alert-ok"   role="status" aria-live="polite"></div>
+
+    <div class="sg-card">
+      <form id="report-form" novalidate aria-label="Submit scam report">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="sg-label" for="rep-type">Threat Type</label>
+            <select id="rep-type" class="sg-select" aria-label="Select threat type">
+              <option value="phone">📞 Phone Number</option>
+              <option value="url">🔗 URL / Website</option>
+              <option value="message">✉️ Message Text</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="sg-label" for="rep-value">
+              Target Value <span class="required-star" aria-hidden="true">*</span>
+            </label>
+            <input id="rep-value" type="text" class="sg-input"
+                   placeholder="e.g. +263771234567 or https://phishing.example.com"
+                   maxlength="2048" required aria-required="true"/>
+          </div>
+          <div class="form-group full-width">
+            <label class="sg-label" for="rep-description">
+              Incident Description <span class="required-star" aria-hidden="true">*</span>
+            </label>
+            <textarea id="rep-description" class="sg-input sg-textarea"
+                      placeholder="Describe exactly what happened — more detail protects more people."
+                      maxlength="4000" required aria-required="true" rows="4"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label class="sg-label" for="rep-tags">
+              Threat Tags <span class="optional-hint">(comma-separated)</span>
+            </label>
+            <input id="rep-tags" type="text" class="sg-input"
+                   placeholder="e.g. phishing, ecocash, fake-landlord, crypto"
+                   maxlength="256" aria-describedby="tags-hint"/>
+            <div class="field-hint" id="tags-hint">Tags improve detection accuracy across the platform.</div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="report-btn" id="report-submit-btn" aria-label="Submit intelligence report">
+            <i class="bi bi-shield-plus" aria-hidden="true"></i>
+            Submit Intelligence Report
+          </button>
+          <div id="report-spinner" class="sg-spinner" aria-label="Submitting…">
+            <div class="spinner-ring"></div>
+            <span>Submitting…</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  RECENT FLAGS / INTEL TABLE
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="section-dark" id="recent-section">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Live Intelligence Feed</div>
+      <h2 class="section-h2">Recently Flagged <span class="gradient-text">Entities</span></h2>
+      <p class="section-p">Highest-risk entries ranked by AI score — updated in real-time from community reports.</p>
+    </div>
+
+    <div id="recent-error" class="sg-alert sg-alert-err" role="alert">Could not load threat intelligence feed.</div>
+
+    <div class="intel-table-wrap sg-card" style="padding:0;overflow:hidden">
+      <div class="intel-table-header">
+        <span><i class="bi bi-database-fill-check"></i> Threat Database</span>
+        <div class="intel-live-badge">
+          <span class="pulse-dot sm"></span> Live
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="intel-table" role="grid" aria-label="Recent threat intelligence">
+          <thead>
             <tr>
-              <th style="width:80px">Type</th>
-              <th>Value</th>
-              <th style="width:200px">Risk Score</th>
-              <th style="width:80px">Reports</th>
-              <th style="width:110px">Status</th>
+              <th scope="col">Type</th>
+              <th scope="col">Entity</th>
+              <th scope="col">Threat Score</th>
+              <th scope="col">Reports</th>
+              <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody id="recent-tbody">
-            <tr>
-              <td colspan="5" class="text-center text-muted py-4">
-                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                Loading…
+            <tr class="skeleton-row" aria-label="Loading">
+              <td colspan="5">
+                <div class="table-skeleton">
+                  <div class="skel-line"></div>
+                  <div class="skel-line short"></div>
+                  <div class="skel-line"></div>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -238,23 +504,165 @@
   </div>
 </section>
 
-<!-- ── Footer ───────────────────────────────────────────────────────────── -->
-<footer class="py-4 bg-dark text-white-50 text-center">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  FOOTER
+════════════════════════════════════════════════════════════════════════════ -->
+<footer class="sg-footer">
   <div class="container">
-    <p class="mb-0 small">
-      <i class="bi bi-shield-fill-check me-1"></i>
-      ScamGuard &mdash; Community-powered fraud detection.
-      Always verify independently before acting on any information.
-    </p>
+    <div class="footer-inner">
+      <div class="footer-brand-wrap">
+        <div class="footer-shield" aria-hidden="true">
+          <i class="bi bi-shield-fill-check"></i>
+        </div>
+        <div>
+          <div class="footer-brand">ScamGuard AI</div>
+          <div class="footer-tagline">Next-generation fraud intelligence</div>
+        </div>
+      </div>
+      <div class="footer-links" role="navigation" aria-label="Footer links">
+        <a href="#check-section">Scan</a>
+        <a href="#threats-section">Threats</a>
+        <a href="#report-section">Report</a>
+        <a href="#recent-section">Intel</a>
+      </div>
+      <div class="footer-badges">
+        <span class="footer-badge"><i class="bi bi-shield-check"></i> Secure</span>
+        <span class="footer-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+      </div>
+    </div>
+    <div class="footer-legal">
+      Reports reflect community submissions and do not constitute legal determinations.
+      Always verify independently. &copy; 2025 ScamGuard AI.
+    </div>
   </div>
 </footer>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmJ/qFNNABb/MimNhFoR5ORG4GB+"
-        crossorigin="anonymous"></script>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  AUTH MODAL
+════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="authModal" tabindex="-1"
+     aria-labelledby="authModalTitle" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
+    <div class="sg-modal-content">
 
-<!-- App JS -->
+      <!-- Modal header -->
+      <div class="modal-hdr">
+        <div class="modal-brand">
+          <div class="modal-shield" aria-hidden="true"><i class="bi bi-shield-lock-fill"></i></div>
+          <span id="authModalTitle">ScamGuard Intelligence Portal</span>
+        </div>
+        <button class="modal-close-btn" data-bs-dismiss="modal" aria-label="Close dialog">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="auth-tab-bar" role="tablist" aria-label="Login or Register">
+        <button class="auth-tab-btn active" id="tab-login"
+                role="tab" aria-selected="true" aria-controls="login-form-wrap"
+                data-tab="login">Login</button>
+        <button class="auth-tab-btn" id="tab-register"
+                role="tab" aria-selected="false" aria-controls="register-form-wrap"
+                data-tab="register">Register</button>
+        <div class="tab-slider" id="tab-slider"></div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="modal-body-inner">
+        <div id="auth-modal-alert"   class="sg-alert sg-alert-err"  role="alert"  aria-live="assertive"></div>
+        <div id="auth-modal-success" class="sg-alert sg-alert-ok"   role="status" aria-live="polite"></div>
+
+        <!-- Login form -->
+        <div id="login-form-wrap" role="tabpanel" aria-labelledby="tab-login">
+          <div class="modal-field">
+            <label class="sg-label" for="login-email">Email Address</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-envelope-fill input-icon" aria-hidden="true"></i>
+              <input type="email" id="login-email" class="sg-input icon-input"
+                     placeholder="you@example.com" autocomplete="email" aria-required="true"/>
+            </div>
+          </div>
+          <div class="modal-field">
+            <label class="sg-label" for="login-password">Password</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-lock-fill input-icon" aria-hidden="true"></i>
+              <input type="password" id="login-password" class="sg-input icon-input"
+                     placeholder="••••••••" autocomplete="current-password" aria-required="true"/>
+            </div>
+          </div>
+          <div id="login-spinner" class="sg-spinner" aria-label="Logging in…">
+            <div class="spinner-ring"></div><span>Authenticating…</span>
+          </div>
+          <button class="modal-submit-btn login-submit" id="login-submit-btn" aria-label="Login to ScamGuard">
+            <i class="bi bi-shield-lock" aria-hidden="true"></i>
+            Access Intelligence Portal
+          </button>
+          <p class="modal-switch-hint">
+            New analyst? <button class="text-link" data-switch-tab="register">Create free account →</button>
+          </p>
+        </div>
+
+        <!-- Register form -->
+        <div id="register-form-wrap" class="d-none" role="tabpanel" aria-labelledby="tab-register">
+          <div class="modal-field">
+            <label class="sg-label" for="reg-email">Email Address</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-envelope-fill input-icon" aria-hidden="true"></i>
+              <input type="email" id="reg-email" class="sg-input icon-input"
+                     placeholder="you@example.com" autocomplete="email" aria-required="true"/>
+            </div>
+          </div>
+          <div class="modal-field">
+            <label class="sg-label" for="reg-password">
+              Password <span class="hint-text">(min 6 characters)</span>
+            </label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-lock-fill input-icon" aria-hidden="true"></i>
+              <input type="password" id="reg-password" class="sg-input icon-input"
+                     placeholder="Choose a strong password" autocomplete="new-password" aria-required="true"/>
+            </div>
+          </div>
+          <div id="register-spinner" class="sg-spinner" aria-label="Creating account…">
+            <div class="spinner-ring" style="border-color:var(--green)"></div>
+            <span>Creating account…</span>
+          </div>
+          <button class="modal-submit-btn register-submit" id="register-submit-btn" aria-label="Create ScamGuard account">
+            <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
+            Join the Intelligence Network
+          </button>
+          <p class="modal-switch-hint">
+            Already a member? <button class="text-link" data-switch-tab="login">Login →</button>
+          </p>
+        </div>
+
+        <!-- Security note -->
+        <div class="modal-security-note">
+          <i class="bi bi-shield-check" style="color:var(--green)" aria-hidden="true"></i>
+          Secured by Supabase Auth · End-to-end encrypted · Never shared
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container" aria-live="polite" role="log"></div>
+
+<!-- Bootstrap JS — no integrity attr (avoids SRI mismatch in Edge/Chrome) -->
+<!-- Bootstrap JS — self-hosted to bypass Edge Tracking Prevention -->
+<!-- Falls back to CDN if local file is somehow missing -->
+<script>
+(function(){
+  var s = document.createElement('script');
+  s.src = '/static/bootstrap-modal.js';
+  s.onerror = function(){
+    var fb = document.createElement('script');
+    fb.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+    document.head.appendChild(fb);
+  };
+  document.head.appendChild(s);
+})();
+</script>
 <script src="/static/app.js"></script>
 </body>
 </html>
